@@ -1,0 +1,20 @@
+package Devices
+public
+	with variables;
+	
+device Alarm
+	features
+		alarm_control : in data port variables::on_off;	--input from AlarmProcess
+end Alarm;
+
+device Heater
+	features
+		heat_control : in data port variables::on_off;	
+end Heater;
+
+device TempSensor
+	features
+		sensor_data : out data port variables::display_temperature_range;	--output to TempSensorProcess
+end TempSensor;
+	
+end Devices;

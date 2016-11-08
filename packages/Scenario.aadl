@@ -1,0 +1,37 @@
+package Scenario
+public
+	with Processes, Devices;
+	
+system Controller
+	
+end Controller;
+
+system implementation Controller.imp
+  	subcomponents
+  	-- processes		
+		alarmProc : process Processes::AlarmProcess;
+		tempProc : process Processes::TempControlProcess;
+		heaterActProc : process Processes::HeaterActuatorProcess;
+		tempSensProc : process Processes::TempSensorProcess;
+		webInterface : process Processes::WebInterface;
+  	-- devices
+		alarm : device Devices::Alarm;
+		heater : device Devices::Heater;
+		tempSensor : device Devices::TempSensor;
+	connections
+	-- inter-process communication
+		t_a : port tempProc.alarm -> alarmProc.alarm_in;
+		t_h : port tempProc.heat_control -> heaterActProc.heat_in;
+		t_w1 : port tempProc.status -> webInterface.monitor_status;
+		t_w2 : port tempProc.display_temp -> webInterface.display_temp;
+		t_t : port tempSensProc.current_temp_out -> tempProc.current_temp;
+		w_t1 : port webInterface.lower_desired_temp -> tempProc.lower_desired_temp;
+		w_t2 : port webInterface.upper_desired_temp -> tempProc.upper_desired_temp;
+		
+  	-- process to sensors/actuators	
+		a_t_a : port alarmProc.alarm_out -> alarm.alarm_control;
+		t_t_t : port tempProc.heat_control -> heater.heat_control;
+		s_t_s :	port tempSensor.sensor_data -> tempSensProc.sensor_input;
+end Controller.imp;
+
+end Scenario;
