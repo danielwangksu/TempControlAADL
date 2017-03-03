@@ -1,51 +1,87 @@
 package Processes
 public
 	with variables;
+	with ACM;
 	
--- alarm control process
+---------------------------------------
+-- alarm actuator process --
+---------------------------------------
 process AlarmProcess
 	features
-		alarm_in : in data port variables::on_off;		--input from TempControlProcess
+		alarm_cmd : in data port variables::on_off;		--input from TempControlProcess
+		alarm_ack : out data port variables::on_off;	--output to tempControlProcess
 		alarm_out : out data port variables::on_off;	--output to alarm device
 end AlarmProcess;
 
--- temperature control process
-process TempControlProcess
-	features
-		current_temp : in data port variables::display_temperature_range;	--input from TempSensorProcess
-		lower_desired_temp : in data port variables::lower_desired_temperature;
-		upper_desired_temp : in data port variables::upper_desired_temperature;
-		lower_alarm_temp : in data port variables::lower_alarm_temperature;
-		upper_alarm_temp : in data port variables::upper_alarm_temperature;
-		display_temp : out data port variables::display_temperature_range;
-		heat_control : out data port variables::on_off;
-		alarm : out data port variables::on_off;		--output to AlarmProcess
-		status : out event data port variables::status;	--output to thermostat device and WebInterface
-end TempControlProcess;
+process implementation AlarmProcess.imp
+	properties
+		ACM::id => 102;
+end AlarmProcess.imp;
 
--- heater actuator driver process
-process HeaterActuatorProcess
+---------------------------------------
+-- fan actuator process --
+---------------------------------------
+process FanProcess
 	features
-		heat_in: in data port variables::on_off;
-		output: out data port variables::on_off;
-end HeaterActuatorProcess;
+		fan_cmd: in data port variables::on_off;
+		fan_ack: out data port variables::on_off;
+		fan_out: out data port variables::on_off;
+end FanProcess;
 
--- temperature sensor driver process
+process implementation FanProcess.imp
+	properties
+		ACM::id => 103;
+end FanProcess.imp;
+
+---------------------------------------
+-- temperature sensor driver process --
+---------------------------------------
 process TempSensorProcess
 	features
 		sensor_input : in data port variables::display_temperature_range;	--input from sensor device
-		current_temp_out : out data port variables::display_temperature_range;	--output to TempControlProcess
+		current_temp : out data port variables::display_temperature_range;	--output to TempControlProcess
 end TempSensorProcess;
 
--- web interface process
+process implementation TempSensorProcess.imp
+	properties
+		ACM::id => 100;
+end TempSensorProcess.imp;
+
+---------------------------------------
+-- temperature control process --
+---------------------------------------
+process TempControlProcess
+	features
+		current_temp : in data port variables::display_temperature_range;	--input from TempSensorProcess
+		desired_temp : in data port;
+		desired_temp_ack : out data port;
+		fan_cmd : out data port variables::on_off;		-- command to FanProcess
+		fan_ack : in data port variables::on_off;		-- acknowledge from FanProcess
+		alarm_cmd : out data port variables::on_off;	-- command to AlarmProcess
+		alarm_ack : in data port variables::on_off;		-- acknowledge from FanProcess
+		status : out data port variables::status;	-- output to thermostat device and WebInterface (log file)
+end TempControlProcess;
+
+process implementation TempControlProcess.imp
+	properties
+		ACM::id => 101;
+end TempControlProcess.imp;
+
+---------------------------------------
+-- web interface process --
+---------------------------------------
 process WebInterface
 	features
-		monitor_status : in data port variables::status;	--input from TempControlProcess
-		display_temp : in data port variables::display_temperature_range;
-		request : in event port;	--input from network
-		response : out event data port;	--output to network
-		lower_desired_temp : out data port variables::lower_desired_temperature;
-		upper_desired_temp : out data port variables::upper_desired_temperature;
-end WebInterface;
+		desired_temp : out data port;
+		desired_temp_ack : in data port;
+		request : in event port;			-- input from network
+		response : out event data port;		-- output to network
+		status : in data port variables::status;
+	end WebInterface;
+
+process implementation WebInterface.imp
+	properties
+		ACM::id => 105;
+end WebInterface.imp;
 
 end Processes;

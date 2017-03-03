@@ -9,28 +9,28 @@ end Controller;
 system implementation Controller.imp
   	subcomponents
   	-- processes		
-		alarmProc : process Processes::AlarmProcess;
-		tempProc : process Processes::TempControlProcess;
-		heaterActProc : process Processes::HeaterActuatorProcess;
-		tempSensProc : process Processes::TempSensorProcess;
-		webInterface : process Processes::WebInterface;
+		alarmProc : process Processes::AlarmProcess.imp;
+		tempProc : process Processes::TempControlProcess.imp;
+		fanProc : process Processes::FanProcess.imp;
+		tempSensProc : process Processes::TempSensorProcess.imp;
+		webInterface : process Processes::WebInterface.imp;
   	-- devices
 		alarm : device Devices::Alarm;
-		heater : device Devices::Heater;
+		fan : device Devices::Fan;
 		tempSensor : device Devices::TempSensor;
 	connections
 	-- inter-process communication
-		t_a : port tempProc.alarm -> alarmProc.alarm_in;
-		t_h : port tempProc.heat_control -> heaterActProc.heat_in;
-		t_w1 : port tempProc.status -> webInterface.monitor_status;
-		t_w2 : port tempProc.display_temp -> webInterface.display_temp;
-		t_t : port tempSensProc.current_temp_out -> tempProc.current_temp;
-		w_t1 : port webInterface.lower_desired_temp -> tempProc.lower_desired_temp;
-		w_t2 : port webInterface.upper_desired_temp -> tempProc.upper_desired_temp;
-		
+		t_t : port tempSensProc.current_temp -> tempProc.current_temp;
+		t_a : port tempProc.alarm_cmd -> alarmProc.alarm_cmd;
+		a_t : port alarmProc.alarm_ack -> tempProc.alarm_ack;
+		t_f : port tempProc.fan_cmd -> fanProc.fan_cmd;
+		f_t : port fanProc.fan_ack -> tempProc.fan_ack;
+		w_t : port webInterface.desired_temp -> tempProc.desired_temp;
+		t_w : port tempProc.desired_temp_ack -> webInterface.desired_temp_ack;
+		t_s : port tempProc.status -> webInterface.status;
   	-- process to sensors/actuators	
 		a_t_a : port alarmProc.alarm_out -> alarm.alarm_control;
-		t_t_t : port tempProc.heat_control -> heater.heat_control;
+		t_t_t : port fanProc.fan_out -> fan.fan_control;
 		s_t_s :	port tempSensor.sensor_data -> tempSensProc.sensor_input;
 end Controller.imp;
 

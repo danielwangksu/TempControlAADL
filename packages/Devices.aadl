@@ -7,10 +7,10 @@ device Alarm
 		alarm_control : in data port variables::on_off;	--input from AlarmProcess
 end Alarm;
 
-device Heater
+device Fan
 	features
-		heat_control : in data port variables::on_off;	
-end Heater;
+		fan_control : in data port variables::on_off; -- input from FanProcess
+end Fan;
 
 device TempSensor
 	features
