@@ -2,6 +2,14 @@ package Devices
 public
 	with variables;
 	
+bus ethernet
+	features
+		incomingA : in data port;
+		outgoingA : out data port;
+		incomingB : in data port;
+		outgoingB : out data port;
+end ethernet;
+	
 device Alarm
 	features
 		alarm_control : in data port variables::on_off;	--input from AlarmProcess
